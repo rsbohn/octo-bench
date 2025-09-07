@@ -10,8 +10,10 @@ BR2_ENABLE_LOCALE=y
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_LATEST_VERSION=y
 BR2_LINUX_KERNEL_USE_DEFCONFIG=y
-BR2_LINUX_KERNEL_DEFCONFIG="x86_64_defconfig"
-BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="board/pyappliance/linux.fragment"
+BR2_LINUX_KERNEL_DEFCONFIG="x86_64"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="/workspaces/octo-bench/pyappliance-br/board/pyappliance/linux.fragment"
+# Kernel build helpers on host
+BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF=y
 # Make sure serial console is visible in QEMU/real HW
 BR2_LINUX_KERNEL_CUSTOM_CMDLINE="console=ttyS0,115200 console=tty0"
 
@@ -23,7 +25,7 @@ BR2_PACKAGE_PYTHON3=y
 BR2_PACKAGE_PYTHON3_PIP=y
 
 # Rootfs overlay with /init and /app/main.py
-BR2_ROOTFS_OVERLAY="board/pyappliance/rootfs-overlay"
+BR2_ROOTFS_OVERLAY="/workspaces/octo-bench/pyappliance-br/board/pyappliance/rootfs-overlay"
 
 # Make a compressed initramfs (also used to produce the ISO)
 BR2_TARGET_ROOTFS_CPIO=y

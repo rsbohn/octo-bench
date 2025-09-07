@@ -148,7 +148,7 @@ CONFIG_IPV6=y
 KCFG
 
 # -------- External defconfig --------
-cat > "${EXT_DIR}/configs/${APP_NAME}_defconfig" << 'DEF'
+cat > "${EXT_DIR}/configs/${APP_NAME}_defconfig" << DEF
 BR2_x86_64=y
 BR2_KERNEL_HEADERS_6_1=y
 
@@ -161,8 +161,10 @@ BR2_ENABLE_LOCALE=y
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_LATEST_VERSION=y
 BR2_LINUX_KERNEL_USE_DEFCONFIG=y
-BR2_LINUX_KERNEL_DEFCONFIG="x86_64_defconfig"
-BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="board/pyappliance/linux.fragment"
+BR2_LINUX_KERNEL_DEFCONFIG="x86_64"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="${EXT_DIR}/board/${APP_NAME}/linux.fragment"
+# Kernel build helpers on host
+BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF=y
 # Make sure serial console is visible in QEMU/real HW
 BR2_LINUX_KERNEL_CUSTOM_CMDLINE="console=ttyS0,115200 console=tty0"
 
@@ -174,7 +176,7 @@ BR2_PACKAGE_PYTHON3=y
 BR2_PACKAGE_PYTHON3_PIP=y
 
 # Rootfs overlay with /init and /app/main.py
-BR2_ROOTFS_OVERLAY="board/pyappliance/rootfs-overlay"
+BR2_ROOTFS_OVERLAY="${EXT_DIR}/board/${APP_NAME}/rootfs-overlay"
 
 # Make a compressed initramfs (also used to produce the ISO)
 BR2_TARGET_ROOTFS_CPIO=y
@@ -193,16 +195,12 @@ BR2_STRIP_strip=y
 BR2_OPTIMIZE_S=y
 DEF
 
-# Patch BR2_EXTERNAL path inside fragment references
-# (Buildroot resolves relative to BR2_EXTERNAL root, which we matched)
-sed -i "s|board/pyappliance|board/${APP_NAME}|g" \
-  "${EXT_DIR}/configs/${APP_NAME}_defconfig" \
-  "${EXT_DIR}/board/${APP_NAME}/linux.fragment" || true
+# No path patching needed; we used absolute paths above
 
 echo "[*] Kicking off Buildroot…"
 cd "${BR_DIR}"
 make BR2_EXTERNAL="${EXT_DIR}" "${APP_NAME}_defconfig"
-make -j"${JOBS}"
+make BR2_EXTERNAL="${EXT_DIR}" -j"${JOBS}"
 
 echo
 echo "=============================================="
