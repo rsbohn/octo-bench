@@ -1,0 +1,5 @@
+# Minimal BR2_EXTERNAL Config.in for pyappliance
+
+menu "pyappliance external options"
+
+endmenu

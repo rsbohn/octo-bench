@@ -1,0 +1,36 @@
+#!/bin/sh
+# tiny init: mount basics, net via DHCP, mount /data if present, run /app/main.py
+set -eux
+
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev || true
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+mdev -s
+
+# Console quality-of-life
+echo 0 > /proc/sys/kernel/printk
+stty -F /dev/ttyS0 115200 || true
+
+# Networking (assumes first NIC is eth0; busybox udhcpc is included)
+ip link set lo up || true
+ip link set eth0 up || true
+udhcpc -i eth0 -q -t 5 -s /usr/share/udhcpc/default.script || true
+
+# Mount a writable place for the app
+mkdir -p /data
+# If /dev/sda1 exists, try to mount it (ext4 or vfat), else use tmpfs
+if [ -e /dev/sda1 ]; then
+  mount -o rw /dev/sda1 /data 2>/dev/null || \
+  mount -t vfat -o rw /dev/sda1 /data 2>/dev/null || \
+  mount -t ext4 -o rw /dev/sda1 /data 2>/dev/null || \
+  mount -t tmpfs tmpfs /data
+else
+  mount -t tmpfs tmpfs /data
+fi
+
+# Hand-off to your Python app
+exec /usr/bin/python3 /app/main.py
+
+# If the app exits, drop to a shell:
+exec sh
